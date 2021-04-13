@@ -1,5 +1,5 @@
 import equations.QESolver;
-import zonk.ZonkGame;
+import game.Dice;
 
 public class Main {
 
@@ -8,6 +8,6 @@ public class Main {
         QESolver solver = new QESolver(1, 2, 1);
         System.out.println(solver.getFirstRoot());
         System.out.println(solver.getSecondRoot());
-        ZonkGame.startGame();
+        Dice.startGame();
     }
 }

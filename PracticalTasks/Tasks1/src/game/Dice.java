@@ -1,46 +1,65 @@
-package zonk;
+package game;
 
 import java.util.Random;
 import java.util.Scanner;
 
-public class ZonkGame {
+/**
+ * the main class, which maintain the game
+ */
+public class Dice {
 
+    // input stream
     private static final Scanner in = new Scanner(System.in);
+    // random generator to simulate the role of dice
     private static Random random = new Random();
+    // id of the player, who starts the round
+    private static int idOfFirst = 0;
+    // the maximum score which player can get in round
+    private static int maxScore = 0;
+    // the number of rounds in this game
+    private static final int N_ROUNDS = 7;
+
     /**
      * starts the interactive game
      */
     public static void startGame () {
 
-        System.out.print("Enter the number of players: ");
-        int nPlayers = in.nextInt();
+        int nPlayers = 0;
+        int nDice = 0;
 
-        System.out.print("Enter the number of dices: ");
-        int nDices = in.nextInt();
+        do {
+            System.out.print("Enter the number of players: ");
+            nPlayers = in.nextInt();
 
-        in.nextLine();
+            System.out.print("Enter the number of dice: ");
+            nDice = in.nextInt();
 
-        if ((nPlayers < 1) || (nDices < 1)) {
-            System.out.println("number of players and number of dices must not be less then one\n" +
-                    "Cannot continue the game. Please, restart the game with an appropriate parameters");
-            return;
-        }
+            in.nextLine();
+
+        } while ((nPlayers < 1) || (nDice < 1));
+
+        maxScore = 6 * nDice;
 
         Player[] players = new Player[nPlayers];
 
         initPlayers(players);
 
-        int idOfFirstPlayer = 0;
-        for (int i = 1; i <= 3; ++i) {
+        for (int i = 1; i <= N_ROUNDS; ++i) {
+
             System.out.println("\n==========================================\n");
             System.out.println("Attempt № " + i + "\n");
-            idOfFirstPlayer = playRound(players, nDices, idOfFirstPlayer);
+            playRound(players);
         }
 
         congratulateWinner(players);
+
         System.out.println("Game over!");
     }
 
+    /**
+     * initializes the players (names and statuses)
+     * @param players an array of players
+     */
     private static void initPlayers (Player[] players) {
 
         for (int i = 0; i < players.length - 1; ++i) {
@@ -58,22 +77,34 @@ public class ZonkGame {
         players[players.length - 1].isReal = false;
     }
 
-    private static int playRound (Player[] players, int nDices, int idOfFirst) {
+    /**
+     * play one round, i.e. let every player roll the dice
+     * @param players array of players
+     */
+    private static void playRound (Player[] players) {
 
-        int maxScore = 6 * nDices;
+        // identifier of the winner of this round, which will start the next round
         int idOfWinner = idOfFirst;
+
+        // max score in this round (winner's score)
         int max = 0;
+
+        // bound for iterations (in order to do all staff in only one for)
         int bound = players.length + 1;
 
         for (int i = idOfFirst; i < bound; ++i) {
 
+            /*
+            if we had reached the end, we must start from beginning till
+            the id, which was the first in this round
+             */
             if (i == players.length) {
                 i = -1;
                 bound = idOfFirst;
                 continue;
             }
 
-            int score = doPlayerMove(players[i], maxScore);
+            int score = doPlayerMove(players[i]);
             if (score > max) {
                 max = score;
                 idOfWinner = i;
@@ -82,27 +113,26 @@ public class ZonkGame {
             System.out.println("\n");
         }
 
-        return idOfWinner;
+        idOfFirst = idOfWinner;
     }
 
-    private static int doPlayerMove (Player player, int maxScore) {
+    /**
+     * let the current player to roll the dice
+     * @param player player, whose turn is to roll the dice
+     * @return the score, which player has got in this round
+     */
+    private static int doPlayerMove (Player player) {
 
         if (!player.isReal) {
-            return doComputerMove(player, maxScore);
+            return doComputerMove(player);
         }
 
         int randSeed = 0;
-        start:
-        {
+        do {
             System.out.print(player.name + ", enter any integer number in range from 0 to 100: ");
             randSeed = in.nextInt();
             in.nextLine();
-
-            if ((randSeed < 0) || (randSeed > 100)) {
-                System.out.println("Wrong number! Try again.");
-                break start;
-            }
-        }
+        } while ((randSeed < 0) || (randSeed > 100));
 
         int score = (random.nextInt(maxScore) + randSeed) % maxScore;
 
@@ -113,7 +143,15 @@ public class ZonkGame {
         return score;
     }
 
-    private static int doComputerMove (Player player, int maxScore) {
+    /**
+     * let the computer to roll the dice
+     * it differs from player's move, because
+     * the computer doesn't need to be asked
+     * to input the random number
+     * @param player computer
+     * @return the score, which computer has got in this round
+     */
+    private static int doComputerMove (Player player) {
 
         int randSeed = random.nextInt(100);
         System.out.println(player.name + ", enter any integer number in range from 0 to 100: " + randSeed);
@@ -127,6 +165,11 @@ public class ZonkGame {
         return score;
     }
 
+    /**
+     * find the id of player, who has the highest score
+     * @param players array of players
+     * @return the id of player with highest score
+     */
     private static int findMaxScoreId (Player[] players) {
 
         int id = 0;
@@ -143,6 +186,10 @@ public class ZonkGame {
         return id;
     }
 
+    /**
+     * congratulate the player, who has the highest score in this game
+     * @param players array of players
+     */
     private static void congratulateWinner (Player[] players) {
 
         int id = findMaxScoreId(players);
@@ -151,6 +198,9 @@ public class ZonkGame {
     }
 }
 
+/**
+ * class of player of Zonk Game
+ */
 class Player {
     String name;
     long score;
