@@ -17,7 +17,7 @@ public class Dice {
     // the maximum score which player can get in round
     private static int maxScore = 0;
     // the number of rounds in this game
-    private static final int N_ROUNDS = 7;
+    private static final int N_ROUNDS = 2;
 
     /**
      * starts the interactive game
