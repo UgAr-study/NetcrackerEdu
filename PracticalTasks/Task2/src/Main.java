@@ -1,7 +1,6 @@
 import animals.*;
 import extended.ExtendedClass;
 import game.Dice;
-import vartask.RestrictedNumber;
 import vartask.RestrictedNumberImpl;
 
 public class Main {
